@@ -33,7 +33,8 @@ typedef enum {
 
 typedef enum {
     EXECUTE_SUCCESS,
-    EXECUTE_TABLE_FULL
+    EXECUTE_TABLE_FULL,
+    EXECUTE_FAILED
 }ExecuteResult;
 
 // data structures
@@ -73,7 +74,6 @@ const uint32_t ROWS_PER_PAGE = PAGE_SIZE / ROW_SIZE;
 const uint32_t TABLE_MAX_ROWS = ROWS_PER_PAGE * TABLE_MAX_PAGES;
 
 // table functions
-
 void print_row(Row* row){
     printf("(%d, %s, %s)\n", row->id, row->username, row->email);
 }
@@ -143,7 +143,7 @@ void read_input(InputBuffer* input_buffer){
     assert(!(bytes_read <= 0));
     
     input_buffer->input_length = bytes_read;
-    if (input_buffer->buffer[bytes_read - 1] = '\n'){
+    if (input_buffer->buffer[bytes_read - 1] == '\n'){
         input_buffer->buffer[bytes_read - 1] = '\0';
         input_buffer->input_length -= 1;
     }
@@ -170,8 +170,8 @@ PrepareResult prepare_statement(InputBuffer* input_buffer, Statement* statement)
         int args_assigned = sscanf(
             input_buffer->buffer, "insert %d %s %s",
             &(statement->row_to_insert.id),
-            &(statement->row_to_insert.username),
-            &(statement->row_to_insert.email);
+            statement->row_to_insert.username,
+            statement->row_to_insert.email);
         if (args_assigned < 3) {
             return PREPARE_SYNTAX_ERROR; 
         }
@@ -211,6 +211,8 @@ ExecuteResult execute_statement(Statement* statement, Table* table){
             return execute_insert(statement, table);
         case(STATEMENT_SELECT):
             return execute_select(statement, table);
+        default:
+            return EXECUTE_FAILED;
     }
 }
 
@@ -249,9 +251,12 @@ int main(int argc, char* argv[]){
                 printf("Executed\n");
                 break;
             case(EXECUTE_TABLE_FULL):
-                printf("Error: Table full\n");
+                printf("Error: Table Full.\n");
+                break;
+            case(EXECUTE_FAILED):
+                printf("Error: Unrecognized Execute Statement\n");
                 break;
         }
-        exit(EXIT_SUCCESS);
-   }
+    }
+    exit(EXIT_SUCCESS);
 }
