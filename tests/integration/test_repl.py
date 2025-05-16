@@ -63,4 +63,27 @@ def test_persistence_to_disk(repl_runner):
     output2, _ = repl_runner(cmds2)
     assert f"({id}, {username}, {email})" in output2
 
+def test_contants(repl_runner):
+    cmds = [".constants"]
+    output1, _ = repl_runner(cmds);
+    assert "ROW_SIZE: 293" in output1
+    assert "COMMON_NODE_HEADER_SIZE: 6" in output1
+    assert "LEAF_NODE_HEADER_SIZE: 10" in output1
+    assert "LEAF_NODE_CELL_SIZE: 297" in output1
+    assert "LEAF_NODE_SPACE_FOR_CELLS: 4086" in output1
+    assert "LEAF_NODE_MAX_CELLS: 13" in output1
+    
+def test_print_structure(repl_runner):
+    cmds = [f"insert {i} user{i} person{i}@example.com" for i in [3, 1, 2]]
+    cmds.append(".btree")
+    output1, _ = repl_runner(cmds); 
+
+    assert "Tree:" in output1
+    assert "leaf (size 3)" in output1
+    assert "  - 0 : 3" in output1
+    assert "  - 1 : 1" in output1
+    assert "  - 2 : 2" in output1
+
+
+
 
