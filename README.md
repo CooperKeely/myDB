@@ -1,2 +1,3 @@
 # myDB
-Writing my own data base in C
+based on the tutorial 
+https://cstack.github.io/db_tutorial/
